@@ -18,7 +18,7 @@ class MQTTClient:
         self.client.on_connect  = self.on_connect
         self.client.on_message  = self.on_message
 
-        self.db_operations = DBOperations()
+        self.db_operations      = DBOperations()
 
     
     def connect(self):
@@ -31,18 +31,35 @@ class MQTTClient:
 
     def on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code == 0:
-            responseMqtt    = client.subscribe("/bobSCS")
-            #parsedResponse = json.dumps(responseMqtt)
-            parsedResponse  = "611C3B010044351C7F121D1D101D2F302B291E15110C090908080707060504030303020201020102"
-
-            response        = requests.get(self.URL + parsedResponse)
-            response_json   = json.dumps(response.json())
-            resp_dic        = json.loads(response_json)
-
-            self.db_operations.insert_data(resp_dic)
-
+            responseMqtt = client.subscribe("v3/test-bob1@scs/devices/#")
+            print(f"Subscripción MQTT exitosa: {responseMqtt}") 
         else:
-            print(f"Error al conectar, código: {reason_code}")
+            print(f"Error al conectar, código: {reason_code}")        
 
     def on_message(self, client, userdata, msg):
-        print("Mensaje recibido en el tema " + msg.topic + ": " + str(msg.payload.decode()))
+     # Decodificar el mensaje recibido
+        try:
+            parsedResponse = json.loads(msg.payload.decode())
+        except json.JSONDecodeError as e:
+            print(f"Error al decodificar el JSON: {e}")
+            return
+        
+        if parsedResponse:
+            try:
+                device_id       = parsedResponse["end_device_ids"]["device_id"]
+                application_id  = parsedResponse["end_device_ids"]["application_ids"]["application_id"]
+                decoded_payload = parsedResponse["uplink_message"]["decoded_payload"]
+                hex_value       = decoded_payload["hex"]
+
+                response = requests.get(self.URL + hex_value)
+
+                if response.status_code == 200:
+                    response_json  = response.json()
+                    self.db_operations.insert_data(response_json)
+                else:
+                    print(f"Error en la petición: {response.status_code}")
+
+            except KeyError as e:
+                print(f"Error al procesar el JSON: {e}")
+        else:
+            print("Error al procesar el JSON")
