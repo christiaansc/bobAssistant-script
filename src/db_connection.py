@@ -22,6 +22,7 @@ class DBConnection:
                                              cursorclass=pymysql.cursors.DictCursor)
             
             return self.connection
+        
         except Exception as e:
             print(f"Error al conectar: {e}")
             return None

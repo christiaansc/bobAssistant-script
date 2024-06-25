@@ -40,22 +40,25 @@ class MQTTClient:
      # Decodificar el mensaje recibido
         try:
             parsedResponse = json.loads(msg.payload.decode())
+
         except json.JSONDecodeError as e:
             print(f"Error al decodificar el JSON: {e}")
             return
         
         if parsedResponse:
             try:
-                device_id       = parsedResponse["end_device_ids"]["device_id"]
+                device_id       = parsedResponse["end_device_ids"]["device_id"] 
                 application_id  = parsedResponse["end_device_ids"]["application_ids"]["application_id"]
                 decoded_payload = parsedResponse["uplink_message"]["decoded_payload"]
                 hex_value       = decoded_payload["hex"]
+                rssi            = parsedResponse["uplink_message"]["rx_metadata"][0]["rssi"]
 
-                response = requests.get(self.URL + hex_value)
+                response = requests.get(self.URL + "72097f5f00313e0700284c537f000000007cffffffffffffffffff")
+    
 
                 if response.status_code == 200:
                     response_json  = response.json()
-                    self.db_operations.insert_data(response_json)
+                    self.db_operations.insert_data(response_json , rssi)
                 else:
                     print(f"Error en la petición: {response.status_code}")
 

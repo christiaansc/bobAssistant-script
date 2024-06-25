@@ -1,60 +1,132 @@
 from db_connection import DBConnection
+import json
 
 class DBOperations:
     def __init__(self):
         self.conn = DBConnection().connection
 
-    def insert_data(self, data):
+    def insert_data(self, data , rssi):
         if self.conn is None:
             print("No se pudo establecer la conexión a la base de datos.")
             return
-    
+
         try:
             with self.conn.cursor() as cursor:
 
-                TYPE_REPORT = data['type']                
+                TYPE_REPORT = data['type']      
+                FFT         = data['msg'].get('fft') 
+                FFT_STR     = json.dumps(FFT)         
 
             # Diccionario con las estructuras SQL y los parámetros correspondientes
                 report_config = {
                 "report": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id, nombre_sensor, tipo_reporte, anomalylevel, vibrationpercentage, 
-                            goodvibration, nbalarmreport, temperature, reportid, vibrationlevel, 
-                            peakfrequencyindex, batterypercentage, operatingtime, created_at
-                        ) VALUES (11, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                            sensor_id, 
+                            nombre_sensor, 
+                            tipo_reporte, 
+                            anomalylevel, 
+                            vibrationpercentage, 
+                            goodvibration, 
+                            nbalarmreport, 
+                            temperature, 
+                            reportid, 
+                            vibrationlevel, 
+                            peakfrequencyindex, 
+                            batterypercentage, 
+                            operatingtime, 
+                            rssi,
+                            reportlength, 
+                            badvibrationpercentage1020,
+                            badvibrationpercentage2040, 
+                            badvibrationpercentage4060, 
+                            badvibrationpercentage6080, 
+                            badvibrationpercentage80100,
+                            anomalylevelto20last24h,
+                            anomalylevelto50last24h,
+                            anomalylevelto80last24h,
+                            anomalylevelto20last30d,
+                            anomalylevelto50last30d,
+                            anomalylevelto80last30d,
+                            anomalylevelto20last6mo,
+                            anomalylevelto50last6mo,
+                            anomalylevelto80last6mo,
+                            totaloperatingtimeknown,
+                            totalunknown1020,
+                            totalunknown2040,
+                            totalunknown4060,
+                            totalunknown6080,
+                            totalunknown80100,
+                            created_at
+                        ) VALUES (11, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s ,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW())
                     """,
                     "params": (
-                        data['sensor'], data['type'], data['msg'].get('anomalylevel'),
-                        data['msg'].get('vibrationpercentage'), data['msg'].get('goodvibration'),
-                        data['msg'].get('nbalarmreport'), data['msg'].get('temperature'), data['msg'].get('reportid'),
-                        data['msg'].get('vibrationlevel'), data['msg'].get('peakfrequencyindex'),
-                        data['msg'].get('batterypercentage'), data['msg'].get('operatingtime')
+                        data['sensor'], 
+                        data['type'], 
+                        data['msg'].get('anomalylevel'),
+                        data['msg'].get('vibrationpercentage'), 
+                        data['msg'].get('goodvibration'),
+                        data['msg'].get('nbalarmreport'), 
+                        data['msg'].get('temperature'), 
+                        data['msg'].get('reportid'),
+                        data['msg'].get('vibrationlevel'), 
+                        data['msg'].get('peakfrequencyindex'),
+                        data['msg'].get('batterypercentage'),
+                        data['msg'].get('operatingtime'),
+                        rssi,
+                        data['msg'].get('reportlength'),
+                        data['msg'].get('badvibrationpercentage1020'),
+                        data['msg'].get('badvibrationpercentage2040'),
+                        data['msg'].get('badvibrationpercentage4060'),
+                        data['msg'].get('badvibrationpercentage6080'),
+                        data['msg'].get('badvibrationpercentage80100'),
+
+                        data['msg'].get('anomalylevelto20last24h'),
+                        data['msg'].get('anomalylevelto50last24h'),
+                        data['msg'].get('anomalylevelto80last24h'),
+                        data['msg'].get('anomalylevelto20last30d'),
+                        data['msg'].get('anomalylevelto50last30d'),
+                        data['msg'].get('anomalylevelto80last30d'),
+                        data['msg'].get('anomalylevelto20last6mo'),
+                        data['msg'].get('anomalylevelto50last6mo'),
+                        data['msg'].get('anomalylevelto80last6mo'),
+
+                        data['msg'].get('totaloperatingtimeknown'),
+                        data['msg'].get('totalunknown1020'),
+                        data['msg'].get('totalunknown2040'),
+                        data['msg'].get('totalunknown4060'),
+                        data['msg'].get('totalunknown6080'),
+                        data['msg'].get('totalunknown80100'),
+
                     )
                 },
                 "alarm": {
                     "sql": """
                         INSERT INTO reporte_sensor (
                             sensor_id, nombre_sensor, tipo_reporte, anomalylevel, temperature, 
-                            vibrationlevel, created_at
-                        ) VALUES (11, %s, %s, %s, %s, %s, NOW())
+                            vibrationlevel,rssi, fft ,created_at
+                        ) VALUES (11, %s, %s, %s, %s, %s ,%s, %s, NOW())
                     """,
                     "params": (
                         data['sensor'], data['type'], data['msg'].get('anomalylevel'),
-                        data['msg'].get('temperature'), data['msg'].get('vibrationlevel')
+                        data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
+                        rssi,
+                        FFT_STR                        
                     )
                 },
                 "learning": {
                     "sql": """
                         INSERT INTO reporte_sensor (
                             sensor_id, nombre_sensor, tipo_reporte, learningpercentage, temperature, 
-                            vibrationlevel, peakfrequencyindex, learningfromscratch, created_at
-                        ) VALUES (11, %s, %s, %s, %s, %s, %s, %s, NOW())
+                            vibrationlevel, peakfrequencyindex, learningfromscratch,rssi,fft, created_at
+                        ) VALUES (11, %s, %s, %s, %s, %s, %s,%s,%s ,%s, NOW())
                     """,
                     "params": (
                         data['sensor'], data['type'], data['msg'].get('learningpercentage'),
                         data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
-                        data['msg'].get('peakfrequencyindex'), data['msg'].get('learningfromscratch')
+                        data['msg'].get('peakfrequencyindex'), data['msg'].get('learningfromscratch'),
+                        rssi,
+                        FFT_STR
                     )
                 },
                 "startstop": {
