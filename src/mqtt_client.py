@@ -53,7 +53,7 @@ class MQTTClient:
                 hex_value       = decoded_payload["hex"]
                 rssi            = parsedResponse["uplink_message"]["rx_metadata"][0]["rssi"]
 
-                response = requests.get(self.URL + "72097f5f00313e0700284c537f000000007cffffffffffffffffff")
+                response = requests.get(self.URL + hex_value)
     
 
                 if response.status_code == 200:
