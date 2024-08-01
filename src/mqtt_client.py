@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 import requests
 from db_operations import DBOperations
+import sys
 
 class MQTTClient:
     def __init__(self):
@@ -32,7 +33,7 @@ class MQTTClient:
     def on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code == 0:
             responseMqtt = client.subscribe("v3/test-bob1@scs/devices/#")
-            print(f"Subscripción MQTT exitosa: {responseMqtt}") 
+            print(f"Subscripción MQTT exitosa: {responseMqtt}" ,  file=sys.stderr) 
         else:
             print(f"Error al conectar, código: {reason_code}")        
 
