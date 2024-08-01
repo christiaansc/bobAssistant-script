@@ -46,19 +46,20 @@ class MQTTClient:
             return
         
         if parsedResponse:
+
+
             try:
-                device_id       = parsedResponse["end_device_ids"]["device_id"] 
-                application_id  = parsedResponse["end_device_ids"]["application_ids"]["application_id"]
-                decoded_payload = parsedResponse["uplink_message"]["decoded_payload"]
+                mac_sensor       = parsedResponse["data"]["end_device_ids"]["dev_eui"] 
+                application_id  = parsedResponse["data"]["end_device_ids"]["application_ids"]["application_id"]
+                decoded_payload = parsedResponse["data"]["uplink_message"]["decoded_payload"]
                 hex_value       = decoded_payload["hex"]
-                rssi            = parsedResponse["uplink_message"]["rx_metadata"][0]["rssi"]
+                rssi            = parsedResponse["data"]["uplink_message"]["rx_metadata"][0]["rssi"]
 
                 response = requests.get(self.URL + hex_value)
     
-
                 if response.status_code == 200:
                     response_json  = response.json()
-                    self.db_operations.insert_data(response_json , rssi)
+                    self.db_operations.insert_data(response_json , rssi, mac_sensor)
                 else:
                     print(f"Error en la petición: {response.status_code}")
 

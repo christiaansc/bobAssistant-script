@@ -5,11 +5,11 @@ class DBOperations:
     def __init__(self):
         self.conn = DBConnection().connection
 
-    def insert_data(self, data , rssi):
+    def insert_data(self, data , rssi , mac_sensor):
         if self.conn is None:
             print("No se pudo establecer la conexión a la base de datos.")
             return
-
+        
         try:
             with self.conn.cursor() as cursor:
 
@@ -17,12 +17,23 @@ class DBOperations:
                 FFT         = data['msg'].get('fft') 
                 FFT_STR     = json.dumps(FFT)         
 
+                # Validacion  si existe sensor
+
+                cursor.execute("SELECT mac,id_sensor FROM sensores WHERE mac = %s", (mac_sensor,))
+                sensor = cursor.fetchone()
+
+
+                if sensor is None:
+                    print("No existe el sensor")
+                    return
+
             # Diccionario con las estructuras SQL y los parámetros correspondientes
                 report_config = {
                 "report": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id, 
+                            sensor_id,
+                            mac_sensor, 
                             nombre_sensor, 
                             tipo_reporte, 
                             anomalylevel, 
@@ -58,10 +69,12 @@ class DBOperations:
                             totalunknown6080,
                             totalunknown80100,
                             created_at
-                        ) VALUES (11, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s ,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW())
+                        ) VALUES (%s,%s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s ,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW())
                     """,
                     "params": (
-                        data['sensor'], 
+                        sensor['id_sensor'],
+                        sensor['mac'],
+                        data['sensor'],
                         data['type'], 
                         data['msg'].get('anomalylevel'),
                         data['msg'].get('vibrationpercentage'), 
@@ -103,11 +116,13 @@ class DBOperations:
                 "alarm": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id, nombre_sensor, tipo_reporte, anomalylevel, temperature, 
+                            sensor_id,mac_sensor, nombre_sensor, tipo_reporte, anomalylevel, temperature, 
                             vibrationlevel,rssi, fft ,created_at
-                        ) VALUES (11, %s, %s, %s, %s, %s ,%s, %s, NOW())
+                        ) VALUES (%s, %s,%s, %s, %s, %s, %s ,%s, %s, NOW())
                     """,
                     "params": (
+                        sensor['id_sensor'],
+                        sensor['mac'],
                         data['sensor'], data['type'], data['msg'].get('anomalylevel'),
                         data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
                         rssi,
@@ -117,11 +132,13 @@ class DBOperations:
                 "learning": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id, nombre_sensor, tipo_reporte, learningpercentage, temperature, 
+                            sensor_id,mac_sensor, nombre_sensor, tipo_reporte, learningpercentage, temperature, 
                             vibrationlevel, peakfrequencyindex, learningfromscratch,rssi,fft, created_at
-                        ) VALUES (11, %s, %s, %s, %s, %s, %s,%s,%s ,%s, NOW())
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s,%s,%s ,%s, NOW())
                     """,
                     "params": (
+                        sensor['id_sensor'],
+                        sensor['mac'],
                         data['sensor'], data['type'], data['msg'].get('learningpercentage'),
                         data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
                         data['msg'].get('peakfrequencyindex'), data['msg'].get('learningfromscratch'),
@@ -132,15 +149,20 @@ class DBOperations:
                 "startstop": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
-                        ) VALUES (11, %s, %s, %s, %s, NOW())
+                            sensor_id,mac_sensor, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
+                        ) VALUES (%s, %s, %s, %s, %s, NOW())
                     """,
                     "params": (
+                        sensor['id_sensor'],
+                        sensor['mac'],
                         data['sensor'], data['type'], data['msg'].get('state'),
                         data['msg'].get('batterypercentage')
                     )
                 }
             }
+            
+
+            
 
             # Obtener configuración para el tipo de reporte actual
                 config = report_config.get(TYPE_REPORT)
