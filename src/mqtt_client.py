@@ -33,7 +33,7 @@ class MQTTClient:
     def on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code == 0:
             responseMqtt = client.subscribe("v3/test-bob1@scs/devices/#")
-            print(f"Subscripción MQTT exitosa: {responseMqtt}" ,  file=sys.stderr) 
+            print(f"Subscripción MQTT exitosa: {responseMqtt}" ,  file=sys.stdout) 
         else:
             print(f"Error al conectar, código: {reason_code}")        
 
