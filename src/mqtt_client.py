@@ -28,14 +28,14 @@ class MQTTClient:
             self.client.connect(self.IP_MQTT, self.PORT)
             self.client.loop_forever()
         except Exception as e:
-            print(f"Error al conectar: {e}")
+            print(f"Error al conectar: {e}", file=sys.stderr)
 
     def on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code == 0:
             responseMqtt = client.subscribe("v3/test-bob1@scs/devices/#")
             print(f"Subscripción MQTT exitosa: {responseMqtt}" ,  file=sys.stdout) 
         else:
-            print(f"Error al conectar, código: {reason_code}")        
+            print(f"Error al conectar, código: {reason_code}" , file=sys.stderr)        
 
     def on_message(self, client, userdata, msg):
      # Decodificar el mensaje recibido
@@ -43,7 +43,7 @@ class MQTTClient:
             parsedResponse = json.loads(msg.payload.decode())
 
         except json.JSONDecodeError as e:
-            print(f"Error al decodificar el JSON: {e}")
+            print(f"Error al decodificar el JSON: {e}" , file=sys.stderr)
             return
         
         if parsedResponse:
@@ -65,6 +65,6 @@ class MQTTClient:
                     print(f"Error en la petición: {response.status_code}")
 
             except KeyError as e:
-                print(f"Error al procesar el JSON: {e}")
+                print(f"Error al procesar el JSON: {e}" , file=sys.stderr)
         else:
-            print("Error al procesar el JSON")
+            print("Error al procesar el JSON" , file=sys.stderr)

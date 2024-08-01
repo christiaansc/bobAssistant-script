@@ -1,5 +1,7 @@
 from db_connection import DBConnection
 import json
+import sys
+
 
 class DBOperations:
     def __init__(self):
@@ -7,7 +9,7 @@ class DBOperations:
 
     def insert_data(self, data , rssi , mac_sensor):
         if self.conn is None:
-            print("No se pudo establecer la conexión a la base de datos.")
+            print("No se pudo establecer la conexión a la base de datos." , file=sys.stderr)
             return
         
         try:
@@ -24,7 +26,7 @@ class DBOperations:
 
 
                 if sensor is None:
-                    print("No existe el sensor")
+                    print("No existe el sensor"  , file=sys.stderr )
                     return
 
             # Diccionario con las estructuras SQL y los parámetros correspondientes
@@ -169,9 +171,9 @@ class DBOperations:
                 if config:
                     cursor.execute(config["sql"], config["params"])
                     self.conn.commit()
-                    print(f"Tipo de reporte: {TYPE_REPORT} insertado correctamente")
+                    print(f"Tipo de reporte: {TYPE_REPORT} insertado correctamente" , file=sys.stdout)
                 else:
-                    print(f"Tipo de reporte desconocido: {TYPE_REPORT}")
+                    print(f"Tipo de reporte desconocido: {TYPE_REPORT}" , file=sys.stderr)
 
         except Exception as e:
-            print(f"Error al insertar datos: {e}")
+            print(f"Error al insertar datos: {e}" , file=sys.stderr)
