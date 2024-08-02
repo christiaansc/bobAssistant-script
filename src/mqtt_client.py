@@ -50,11 +50,11 @@ class MQTTClient:
 
             print(f"parsedResponse: {parsedResponse}" , file=sys.stdout)
             try:
-                mac_sensor       = parsedResponse["data"]["end_device_ids"]["dev_eui"] 
-                application_id  = parsedResponse["data"]["end_device_ids"]["application_ids"]["application_id"]
-                decoded_payload = parsedResponse["data"]["uplink_message"]["decoded_payload"]
+                mac_sensor       = parsedResponse["end_device_ids"]["dev_eui"] 
+                application_id  = parsedResponse["end_device_ids"]["application_ids"]["application_id"]
+                decoded_payload = parsedResponse["uplink_message"]["decoded_payload"]
                 hex_value       = decoded_payload["hex"]
-                rssi            = parsedResponse["data"]["uplink_message"]["rx_metadata"][0]["rssi"]
+                rssi            = parsedResponse["uplink_message"]["rx_metadata"][0]["rssi"]
 
                 response = requests.get(self.URL + hex_value)
     
