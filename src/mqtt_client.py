@@ -48,7 +48,7 @@ class MQTTClient:
         
         if parsedResponse:
 
-
+            print(f"parsedResponse: {parsedResponse}" , file=sys.stdout)
             try:
                 mac_sensor       = parsedResponse["data"]["end_device_ids"]["dev_eui"] 
                 application_id  = parsedResponse["data"]["end_device_ids"]["application_ids"]["application_id"]
@@ -62,9 +62,9 @@ class MQTTClient:
                     response_json  = response.json()
                     self.db_operations.insert_data(response_json , rssi, mac_sensor)
                 else:
-                    print(f"Error en la petición: {response.status_code}")
+                    print(f"Error en la petición: {response.status_code}", file=sys.stdout)
 
             except KeyError as e:
                 print(f"Error al procesar el JSON: {e}" , file=sys.stderr)
         else:
-            print("Error al procesar el JSON" , file=sys.stderr)
+            print("Error al parsear el JSON" , file=sys.stderr)
