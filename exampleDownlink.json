@@ -1,0 +1,31 @@
+{
+    "end_device_ids": {
+      "device_id": "bob-scsequipos1",
+      "application_ids": {
+        "application_id": "test-bob1"
+      },
+      "dev_eui": "70B3D531C0002F2E",
+      "join_eui": "70B3D531C1120021",
+      "dev_addr": "27FD61A0"
+    },
+    "correlation_ids": [
+      "as:downlink:01J4STNH64CX1QGWV8FCG2F3GP",
+      "rpc:/ttn.lorawan.v3.AppAs/DownlinkQueueReplace:36c34db0-0ec7-43ca-8a42-5d99998da07c"
+    ],
+    "received_at": "2024-08-08T20:25:15.204457486Z",
+    "downlink_queued": {
+      "f_port": 1,
+      "frm_payload": "UA==",
+      "decoded_payload": {
+        "command": 100
+      },
+      "confirmed": true,
+      "correlation_ids": [
+        "as:downlink:01J4STNH64CX1QGWV8FCG2F3GP",
+        "rpc:/ttn.lorawan.v3.AppAs/DownlinkQueueReplace:36c34db0-0ec7-43ca-8a42-5d99998da07c"
+      ],
+      "confirmed_retry": {
+        "attempt": 1
+      }
+    }
+  }

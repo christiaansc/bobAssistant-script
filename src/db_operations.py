@@ -21,9 +21,8 @@ class DBOperations:
 
                 # Validacion  si existe sensor
 
-                cursor.execute("SELECT mac,id_sensor FROM sensores WHERE mac = %s", (mac_sensor,))
+                cursor.execute("SELECT mac,id_sensor , nombre FROM sensores WHERE mac = %s", (mac_sensor))
                 sensor = cursor.fetchone()
-
 
                 if sensor is None:
                     print("No existe el sensor"  , file=sys.stderr )
@@ -76,7 +75,7 @@ class DBOperations:
                     "params": (
                         sensor['id_sensor'],
                         sensor['mac'],
-                        data['sensor'],
+                        sensor['nombre'],
                         data['type'], 
                         data['msg'].get('anomalylevel'),
                         data['msg'].get('vibrationpercentage'), 
@@ -125,7 +124,7 @@ class DBOperations:
                     "params": (
                         sensor['id_sensor'],
                         sensor['mac'],
-                        data['sensor'], data['type'], data['msg'].get('anomalylevel'),
+                        sensor['nombre'], data['type'], data['msg'].get('anomalylevel'),
                         data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
                         rssi,
                         FFT_STR                        
@@ -141,7 +140,7 @@ class DBOperations:
                     "params": (
                         sensor['id_sensor'],
                         sensor['mac'],
-                        data['sensor'], data['type'], data['msg'].get('learningpercentage'),
+                        sensor['nombre'], data['type'], data['msg'].get('learningpercentage'),
                         data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
                         data['msg'].get('peakfrequencyindex'), data['msg'].get('learningfromscratch'),
                         rssi,
@@ -157,7 +156,9 @@ class DBOperations:
                     "params": (
                         sensor['id_sensor'],
                         sensor['mac'],
-                        data['sensor'], data['type'], data['msg'].get('state'),
+                        sensor['nombre'], 
+                        data['type'], 
+                        data['msg'].get('state'),
                         data['msg'].get('batterypercentage')
                     )
                 }
@@ -168,6 +169,8 @@ class DBOperations:
 
             # Obtener configuración para el tipo de reporte actual
                 config = report_config.get(TYPE_REPORT)
+                print(f"config: {config}" , file=sys.stdout)
+                
                 if config:
                     cursor.execute(config["sql"], config["params"])
                     self.conn.commit()
