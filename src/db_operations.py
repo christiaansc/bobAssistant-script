@@ -21,6 +21,9 @@ class DBOperations:
 
                 # Validacion  si existe sensor
 
+
+                print(FFT_STR)
+
                 cursor.execute("SELECT mac,id_sensor , nombre FROM sensores WHERE mac = %s", (mac_sensor))
                 sensor = cursor.fetchone()
 
@@ -135,7 +138,7 @@ class DBOperations:
                         INSERT INTO reporte_sensor (
                             sensor_id,mac_sensor, nombre_sensor, tipo_reporte, learningpercentage, temperature, 
                             vibrationlevel, peakfrequencyindex, learningfromscratch,rssi,fft, created_at
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s,%s,%s ,%s, NOW())
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
                     """,
                     "params": (
                         sensor['id_sensor'],
@@ -151,7 +154,7 @@ class DBOperations:
                     "sql": """
                         INSERT INTO reporte_sensor (
                             sensor_id,mac_sensor, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
-                        ) VALUES (%s, %s, %s, %s, %s, NOW())
+                        ) VALUES (%s,%s, %s, %s, %s, %s, NOW())
                     """,
                     "params": (
                         sensor['id_sensor'],
