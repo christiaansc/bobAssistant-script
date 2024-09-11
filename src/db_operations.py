@@ -1,13 +1,15 @@
 from db_connection import DBConnection
 import json
 import sys
+import math
+
 
 
 class DBOperations:
     def __init__(self):
         self.conn = DBConnection().connection
 
-    def insert_data(self, data , rssi , mac_sensor):
+    def insert_data(self, data , rssi , mac_sensor , dec_value):
         if self.conn is None:
             print("No se pudo establecer la conexión a la base de datos." , file=sys.stderr)
             return
@@ -15,14 +17,12 @@ class DBOperations:
         try:
             with self.conn.cursor() as cursor:
 
-                TYPE_REPORT = data['type']      
-                FFT         = data['msg'].get('fft') 
-                FFT_STR     = json.dumps(FFT)         
+                TYPE_REPORT     = data['type']      
+                FFT             = data['msg'].get('fft') 
+                FFT_STR         = json.dumps(FFT)   
+                totalunknown010 = math.floor((data['msg'].get('operatingtime') * dec_value / 127))    
 
                 # Validacion  si existe sensor
-
-
-                print(FFT_STR)
 
                 cursor.execute("SELECT mac,id_sensor , nombre FROM sensores WHERE mac = %s", (mac_sensor))
                 sensor = cursor.fetchone()
@@ -67,13 +67,14 @@ class DBOperations:
                             anomalylevelto50last6mo,
                             anomalylevelto80last6mo,
                             totaloperatingtimeknown,
+                            totalunknown010,
                             totalunknown1020,
                             totalunknown2040,
                             totalunknown4060,
                             totalunknown6080,
                             totalunknown80100,
                             created_at
-                        ) VALUES (%s,%s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s ,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW())
+                        ) VALUES (%s,%s, %s, %s,%s, %s, %s, %s,%s,%s, %s, %s, %s, %s,%s,%s,%s ,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW())
                     """,
                     "params": (
                         sensor['id_sensor'],
@@ -109,6 +110,7 @@ class DBOperations:
                         data['msg'].get('anomalylevelto80last6mo'),
 
                         data['msg'].get('totaloperatingtimeknown'),
+                        totalunknown010,
                         data['msg'].get('totalunknown1020'),
                         data['msg'].get('totalunknown2040'),
                         data['msg'].get('totalunknown4060'),
@@ -172,7 +174,6 @@ class DBOperations:
 
             # Obtener configuración para el tipo de reporte actual
                 config = report_config.get(TYPE_REPORT)
-                print(f"config: {config}" , file=sys.stdout)
                 
                 if config:
                     cursor.execute(config["sql"], config["params"])
