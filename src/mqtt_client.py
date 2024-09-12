@@ -56,17 +56,12 @@ class MQTTClient:
                 hex_value       = decoded_payload["hex"]
                 rssi            = parsedResponse["uplink_message"]["rx_metadata"][0]["rssi"]
                 
-                sub_value       = hex_value[6:8]
-
-                # Convertir de hex a decimal
-                dec_value       = int(sub_value, 16)
-
 
                 response = requests.get(self.URL + hex_value)
     
                 if response.status_code == 200:
                     response_json  = response.json()
-                    self.db_operations.insert_data(response_json , rssi, mac_sensor , dec_value)
+                    self.db_operations.insert_data(response_json , rssi, mac_sensor , hex_value)
                 else:
                     print(f"Error en la petición: {response.status_code}", file=sys.stdout)
 

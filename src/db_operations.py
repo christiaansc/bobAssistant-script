@@ -9,7 +9,7 @@ class DBOperations:
     def __init__(self):
         self.conn = DBConnection().connection
 
-    def insert_data(self, data , rssi , mac_sensor , dec_value):
+    def insert_data(self, data , rssi , mac_sensor , hex_value):
         if self.conn is None:
             print("No se pudo establecer la conexión a la base de datos." , file=sys.stderr)
             return
@@ -20,7 +20,9 @@ class DBOperations:
                 TYPE_REPORT     = data['type']      
                 FFT             = data['msg'].get('fft') 
                 FFT_STR         = json.dumps(FFT)   
-                totalunknown010 = math.floor((data['msg'].get('operatingtime') * dec_value / 127))    
+                decoded_payload = hex_value    
+
+                print(f"decoded_payload: {decoded_payload}" , file=sys.stdout)
 
                 # Validacion  si existe sensor
 
@@ -67,7 +69,7 @@ class DBOperations:
                             anomalylevelto50last6mo,
                             anomalylevelto80last6mo,
                             totaloperatingtimeknown,
-                            totalunknown010,
+                            decoded_payload,
                             totalunknown1020,
                             totalunknown2040,
                             totalunknown4060,
@@ -110,7 +112,7 @@ class DBOperations:
                         data['msg'].get('anomalylevelto80last6mo'),
 
                         data['msg'].get('totaloperatingtimeknown'),
-                        totalunknown010,
+                        decoded_payload,
                         data['msg'].get('totalunknown1020'),
                         data['msg'].get('totalunknown2040'),
                         data['msg'].get('totalunknown4060'),
