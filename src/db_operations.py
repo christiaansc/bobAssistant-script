@@ -10,6 +10,10 @@ class DBOperations:
         self.conn = DBConnection().connection
 
     def insert_data(self, data , rssi , mac_sensor , hex_value):
+
+        print(f"data: {json.dumps(data['msg'].get('fft')) }" , file=sys.stdout)
+
+
         if self.conn is None:
             print("No se pudo establecer la conexión a la base de datos." , file=sys.stderr)
             return
@@ -21,6 +25,10 @@ class DBOperations:
                 FFT             = data['msg'].get('fft') 
                 FFT_STR         = json.dumps(FFT)   
                 decoded_payload = hex_value    
+
+
+             
+
 
                 print(f"decoded_payload: {decoded_payload}" , file=sys.stdout)
 
@@ -121,48 +129,70 @@ class DBOperations:
 
                     )
                 },
-                "alarm": {
-                    "sql": """
-                        INSERT INTO reporte_sensor (
-                            sensor_id,mac_sensor, nombre_sensor, tipo_reporte, anomalylevel, temperature, 
-                            vibrationlevel,rssi, fft ,created_at
-                        ) VALUES (%s, %s,%s, %s, %s, %s, %s ,%s, %s, NOW())
-                    """,
-                    "params": (
-                        sensor['id_sensor'],
-                        sensor['mac'],
-                        sensor['nombre'], data['type'], data['msg'].get('anomalylevel'),
-                        data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
-                        rssi,
-                        FFT_STR                        
-                    )
-                },
+
                 "learning": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id,mac_sensor, nombre_sensor, tipo_reporte, learningpercentage, temperature, 
-                            vibrationlevel, peakfrequencyindex, learningfromscratch,rssi,fft, created_at
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                            sensor_id,
+                            mac_sensor,
+                            decoded_payload,
+                            nombre_sensor,
+                            tipo_reporte, 
+                            learningpercentage, 
+                            temperature, 
+                            vibrationlevel, 
+                            peakfrequencyindex, 
+                            learningfromscratch,
+                            rssi,
+                            fft, 
+                            created_at
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ,NOW())
                     """,
                     "params": (
                         sensor['id_sensor'],
                         sensor['mac'],
-                        sensor['nombre'], data['type'], data['msg'].get('learningpercentage'),
-                        data['msg'].get('temperature'), data['msg'].get('vibrationlevel'),
-                        data['msg'].get('peakfrequencyindex'), data['msg'].get('learningfromscratch'),
+                        decoded_payload,
+                        sensor['nombre'], 
+                        data['type'], 
+                        data['msg'].get('learningpercentage'),
+                        data['msg'].get('temperature'),
+                        data['msg'].get('vibrationlevel'),
+                        data['msg'].get('peakfrequencyindex'), 
+                        data['msg'].get('learningfromscratch'),
                         rssi,
                         FFT_STR
+                    )
+                },
+                "alarm": {
+                    "sql": """
+                        INSERT INTO reporte_sensor (
+                            sensor_id, mac_sensor, decoded_payload, nombre_sensor, tipo_reporte, anomalylevel, temperature, 
+                            vibrationlevel, rssi, fft, created_at
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                    """,
+                    "params": (
+                        sensor['id_sensor'],         # %s
+                        sensor['mac'],               # %s
+                        decoded_payload,             # %s
+                        sensor['nombre'],            # %s
+                        data['type'],                # %s
+                        data['msg'].get('anomalylevel'),   # %s
+                        data['msg'].get('temperature'),    # %s
+                        data['msg'].get('vibrationlevel'), # %s
+                        rssi,                        # %s
+                        FFT_STR                      # %s
                     )
                 },
                 "startstop": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id,mac_sensor, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
+                            sensor_id,mac_sensor, decoded_payload, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
                         ) VALUES (%s,%s, %s, %s, %s, %s, NOW())
                     """,
                     "params": (
                         sensor['id_sensor'],
                         sensor['mac'],
+                        decoded_payload,
                         sensor['nombre'], 
                         data['type'], 
                         data['msg'].get('state'),
@@ -185,4 +215,4 @@ class DBOperations:
                     print(f"Tipo de reporte desconocido: {TYPE_REPORT}" , file=sys.stderr)
 
         except Exception as e:
-            print(f"Error al insertar datos: {e}" , file=sys.stderr)
+            print(f"Error al insertar datos: {e} , {TYPE_REPORT} , {data}" , file=sys.stderr)

@@ -48,10 +48,8 @@ class MQTTClient:
         
         if parsedResponse:
 
-            print(f"parsedResponse: {parsedResponse}" , file=sys.stdout)
             try:
                 mac_sensor      = parsedResponse["end_device_ids"]["dev_eui"] 
-                application_id  = parsedResponse["end_device_ids"]["application_ids"]["application_id"]
                 decoded_payload = parsedResponse["uplink_message"]["decoded_payload"]
                 hex_value       = decoded_payload["hex"]
                 rssi            = parsedResponse["uplink_message"]["rx_metadata"][0]["rssi"]
