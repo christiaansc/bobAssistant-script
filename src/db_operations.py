@@ -186,8 +186,8 @@ class DBOperations:
                 "startstop": {
                     "sql": """
                         INSERT INTO reporte_sensor (
-                            sensor_id,mac_sensor, decoded_payload, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
-                        ) VALUES (%s,%s, %s, %s, %s, %s, NOW())
+                            sensor_id, mac_sensor, decoded_payload, nombre_sensor, tipo_reporte, state, batterypercentage, created_at
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
                     """,
                     "params": (
                         sensor['id_sensor'],
