@@ -217,10 +217,4 @@ class DBOperations:
         except Exception as e:
             print(f"Error al insertar datos: {e} , {TYPE_REPORT} , {data}" , file=sys.stderr)
 
-            if self.conn:
-                self.conn.rollback()  
-        finally:
-            if cursor:
-                cursor.close()
-            if self.conn:
-                self.conn.close()
+        
