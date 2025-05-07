@@ -2,6 +2,9 @@ from db_connection import DBConnection
 import json
 import sys
 import math
+from logger import Logger
+import pymysql
+
 
 
 
@@ -11,12 +14,15 @@ class DBOperations:
 
     def insert_data(self, data , rssi , mac_sensor , hex_value):
 
-        print(f"data: {json.dumps(data['msg'].get('fft')) }" , file=sys.stdout)
 
+        if self.conn is None or not self.conn.open:
+            Logger.warning("Conexión a la base de datos cerrada, intentando reconectar...")
+            self.conn = DBConnection().connection
 
         if self.conn is None:
-            print("No se pudo establecer la conexión a la base de datos." , file=sys.stderr)
+            Logger.error("No se pudo establecer la conexión a la base de datos.")
             return
+
         
         try:
             with self.conn.cursor() as cursor:
@@ -38,7 +44,7 @@ class DBOperations:
                 sensor = cursor.fetchone()
 
                 if sensor is None:
-                    print("No existe el sensor"  , file=sys.stderr )
+                    Logger.error("No existe el sensor.")
                     return
 
             # Diccionario con las estructuras SQL y los parámetros correspondientes
@@ -209,12 +215,35 @@ class DBOperations:
                 
                 if config:
                     cursor.execute(config["sql"], config["params"])
-                    self.conn.commit()
-                    print(f"Tipo de reporte: {TYPE_REPORT} insertado correctamente" , file=sys.stdout)
-                else:
-                    print(f"Tipo de reporte desconocido: {TYPE_REPORT}" , file=sys.stderr)
 
+                    sql_update_sensor = """
+                        UPDATE sensores
+                        SET status_time_alert = %s,   -- nuevo valor de estado/alerta
+                            updated_at = NOW()        -- timestamp de la actualización
+                        WHERE mac = %s                 -- identificador único del sensor
+                    """
+                    params_update_sensor = (0, mac_sensor)
+                    
+                    # 3) Ejecutar UPDATE
+                    cursor.execute(sql_update_sensor, params_update_sensor)
+                    
+                                    
+
+                    self.conn.commit()
+                    Logger.info(f"Tipo de reporte: {TYPE_REPORT} insertado correctamente")
+
+
+                else:
+                    Logger.warning(f"Tipo de reporte desconocido: {TYPE_REPORT}")
+
+        except pymysql.OperationalError as e:
+            if e.args[0] in [2006, 2013]:
+                Logger.warning("Conexión perdida, intentando reconectar...")
+                self.conn = DBConnection().connection
+                self.insert_data(data, rssi, mac_sensor, hex_value)  # Reintentar
+            else:
+                Logger.error(f"Error al insertar datos: {e}")
         except Exception as e:
-            print(f"Error al insertar datos: {e} , {TYPE_REPORT} , {data}" , file=sys.stderr)
+            Logger.error(f"Error al insertar datos: {e} , {TYPE_REPORT} , {data}")
 
         

@@ -1,16 +1,16 @@
 from mqtt_client import MQTTClient
 import time
-import sys
-
 
 
 if __name__ == "__main__":
     mqtt_client = MQTTClient()
-    
-    while True:
-        try:
-            mqtt_client.connect()
-        except Exception as e:
-            print(f"Error: {e}" , file=sys.stderr)
+    mqtt_client.connect()
 
+    try:
+        while True:
+            time.sleep(1)  # Mantener el script corriendo
+    except KeyboardInterrupt:
+        print("Desconectando cliente MQTT...")
+        mqtt_client.client.loop_stop()
+        mqtt_client.client.disconnect()
 
